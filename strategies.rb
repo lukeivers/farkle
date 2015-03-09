@@ -1,4 +1,6 @@
 class Strategy < Array
+  attr_accessor :bank_min
+
   def initialize
     self.concat([
                     self.method(:choose_straight),
@@ -108,5 +110,31 @@ class Strategy < Array
     end
     dice.choose([dice.index(5)])
     return 50
+  end
+  def bank(dice = Dice.new, current_score = 0)
+    temp_score = -1
+    if current_score >= @bank_min
+      if $debug
+        puts "cleaning up"
+      end
+      temp_score = 0
+      ones = dice.ones?
+      if ones > 0
+        if $debug
+          puts "chose #{ones} 1's"
+        end
+        dice.choose(dice.indexes(1))
+        temp_score += ones * 100
+      end
+      fives = dice.fives?
+      if fives > 0
+        if $debug
+          puts "chose #{fives} 5's"
+        end
+        dice.choose(dice.indexes(5))
+        temp_score += fives * 50
+      end
+    end
+    return temp_score
   end
 end

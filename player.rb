@@ -11,6 +11,8 @@ class Player
     @temp_score = 0
     @banked = false
     @strategies = Strategy.new
+    @strategies.bank_min = rand(450)+300
+    puts @strategies.bank_min.to_s
   end
   def choose(dice = Dice.new)
     done = false
@@ -24,26 +26,9 @@ class Player
         done = true
       end
     end
-    if @temp_score >= rand(450)+300
-      if $debug
-        puts "cleaning up"
-      end
-      ones = dice.ones?
-      if ones > 0
-        if $debug
-          puts "chose #{ones} 1's"
-        end
-        dice.choose(dice.indexes(1))
-        @temp_score += ones * 100
-      end
-      fives = dice.fives?
-      if fives > 0
-        if $debug
-          puts "chose #{fives} 5's"
-        end
-        dice.choose(dice.indexes(5))
-        @temp_score += fives * 50
-      end
+    banked_value = @strategies.bank(dice, @temp_score)
+    if banked_value >= 0
+      @temp_score += banked_value
       @banked = true
     end
   end
