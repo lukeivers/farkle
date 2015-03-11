@@ -138,9 +138,9 @@ time = Benchmark.measure do
 end
 end
 
-strategy_matrix.sort_by {|strategy| strategy.wins}.reverse[0..9].each do |strategy|
+strategy_matrix.sort_by {|strategy| strategy.percentage}.reverse[0..9].each do |strategy|
   puts strategy.to_s + ", bank_min: #{strategy.bank_min}"
-  puts "#{strategy.wins.to_f/strategy.total_games.to_f*100}"
+  puts "#{strategy.percentage*100}"
 end
 
 puts time

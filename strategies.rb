@@ -185,4 +185,8 @@ class Strategy < Array
     end
     return temp_score
   end
+
+  def percentage
+    self.wins.to_f/self.total_games.to_f
+  end
 end
