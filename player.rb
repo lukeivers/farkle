@@ -6,18 +6,23 @@ class Player
   attr_accessor :temp_score
   attr_accessor :banked
   attr_accessor :strategies
+  attr_accessor :passing
   def initialize
     @score = 0
     @temp_score = 0
     @banked = false
+    @passing = false
     @strategies = Strategy.new
-    @strategies.bank_min = rand(450)+300
-    puts @strategies.bank_min.to_s
   end
   def choose(dice = Dice.new)
     done = false
     while not done
       chosen_strategy = @strategies.available?(dice).sample
+      if chosen_strategy == nil
+        @passing = true
+        done = true
+        next
+      end
       score = chosen_strategy.call(dice)
       @temp_score += score
       if @strategies.available?(dice).size == 0
@@ -33,6 +38,9 @@ class Player
     end
   end
   def banked?
-    banked
+    @banked
+  end
+  def passing?
+    @passing
   end
 end

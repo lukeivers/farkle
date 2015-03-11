@@ -1,35 +1,74 @@
 class Strategy < Array
   attr_accessor :bank_min
+  attr_accessor :wins
+  attr_accessor :total_games
 
-  def initialize
-    self.concat([
-                    self.method(:choose_straight),
-                    self.method(:choose_pairs),
-                    self.method(:choose_set),
-                    self.method(:choose_all_ones),
-                    self.method(:choose_single_one),
-                    self.method(:choose_all_fives),
-                    self.method(:choose_single_five),
-                ])
+  def self.all_single
+    [
+        :choose_straight,
+        :choose_pairs,
+        :choose_set,
+    ]
   end
+
+  def self.all_multiple
+    [
+        [ :choose_all_ones, :choose_single_one ],
+        [ :choose_all_fives, :choose_single_five ],
+    ]
+  end
+
+  def self.all_bank_strategies
+    [ 500, 750 ]
+  end
+
+  def initialize(arg = nil)
+    @wins = 0
+    @total_games = 0
+    @bank_min = 300
+    if arg != nil
+      super(arg)
+    end
+  end
+
+  def stop_gap(dice = Dice.new)
+    if dice.ones? > 0
+      return self.method(:choose_single_one)
+    elsif dice.fives? > 0
+      return self.method(:choose_single_five)
+    elsif dice.has_set?
+      return self.method(:choose_set)
+    elsif dice.has_pairs?
+      return self.method(:choose_pairs)
+    else
+      return self.method(:choose_straight)
+    end
+  end
+
   def available?(dice = Dice.new)
     available_strategies = []
-    if dice.has_straight?
+    if dice.has_straight? and self.include? :choose_straight
       available_strategies << self.method(:choose_straight)
     end
-    if dice.has_pairs?
+    if dice.has_pairs? and self.include? :choose_pairs
       available_strategies << self.method(:choose_pairs)
     end
-    if dice.has_set?
+    if dice.has_set? and self.include? :choose_set
       available_strategies << self.method(:choose_set)
     end
     if dice.ones? > 0
-      available_strategies << self.method(:choose_all_ones)
-      available_strategies << self.method(:choose_single_one)
+      if self.include? :choose_all_ones
+        available_strategies << self.method(:choose_all_ones)
+      elsif self.include? :choose_single_one
+        available_strategies << self.method(:choose_single_one)
+      end
     end
     if dice.fives? > 0
-      available_strategies << self.method(:choose_all_fives)
-      available_strategies << self.method(:choose_single_five)
+      if self.include? :choose_all_fives
+        available_strategies << self.method(:choose_all_fives)
+      elsif self.include? :choose_single_five
+        available_strategies << self.method(:choose_single_five)
+      end
     end
     available_strategies
   end
@@ -110,6 +149,15 @@ class Strategy < Array
     end
     dice.choose([dice.index(5)])
     return 50
+  end
+  def bank_at_300
+    @bank_min = 300
+  end
+  def bank_at_500
+    @bank_min = 500
+  end
+  def bank_at_750
+    @bank_min = 750
   end
   def bank(dice = Dice.new, current_score = 0)
     temp_score = -1
